@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
     for uid in uids_to_fetch:
         header = fetch_header(0, False, uid)
-        store[uid] = header
+        store[uid] = unicode(header, errors='ignore')
 
     write_store()
     end = time.time()
