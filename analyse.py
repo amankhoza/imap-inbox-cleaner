@@ -14,6 +14,15 @@ def extract_address(email_string):
         return from_field.split('<')[1].strip('>')
 
 
+def extract_date(email_string):
+    latest_email = email.message_from_string(email_string)
+    date_tuple = email.utils.parsedate(latest_email['Date'])
+    if date_tuple:
+        return time.strftime('%d %b %Y', date_tuple)
+    else:
+        return '-- --- ----'
+
+
 def extract_domain(address):
     if '@' not in address:
         return address
@@ -61,12 +70,7 @@ if __name__ == "__main__":
         address = x[0]
         uids = address_to_uids[address]
         latest_uid = max(uids)
-        latest_email = email.message_from_string(store[latest_uid])
-        date_tuple = email.utils.parsedate(latest_email['Date'])
-        if date_tuple:
-            date = time.strftime('%d %b %Y', date_tuple)
-        else:
-            date = '-- --- ----'
+        date = extract_date(store[latest_uid])
         print(date + '\t' + occurences + '\t' + address)
 
     print('\nYou have {} unread emails from {} unique domains:\n'.format(len(store), len(domain_occurences)))
