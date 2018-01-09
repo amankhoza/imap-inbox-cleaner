@@ -1,0 +1,4 @@
+# Python generated files
+*.pyc
+# Directories
+*/
