@@ -79,3 +79,11 @@ r indiegogo.com
 d coffee.machine@companeo-news.co.uk
 r ".*@.*monzo.*"
 ```
+
+#### Terminal based program to build instructions
+
+To rapidly go through your emails and build a list of instructions to perform, simply run:
+
+`python build_instructions.py data.json`
+
+This will show you the last 10 emails you have received from each domain, and you can type in the instruction you wish to perform on the emails, it will then move on to the next domain, etc. You can type 'f' and then enter at any time to finish. As you go through your emails the program will keep track of and display how many emails you have currently processed. 
