@@ -80,7 +80,7 @@ d coffee.machine@companeo-news.co.uk
 r ".*@.*monzo.*"
 ```
 
-#### Terminal based program to build instructions
+#### Terminal based program to build instructions file
 
 To rapidly go through your emails and build a list of instructions to perform, simply run:
 
