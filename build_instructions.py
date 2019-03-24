@@ -16,9 +16,40 @@ def extract_subject(email_string):
     return ''.join(s for s in ascii_subject if ord(s)>31 and ord(s)<126)  # removes formatting characters
 
 
+def existing_instructions_file_exists():
+    data_directory = os.path.dirname(DATA_PATH)
+    return os.path.isfile(data_directory + '/instructions')
+
+
+def load_existing_instructions_file():
+    data_directory = os.path.dirname(DATA_PATH)
+    instructions = open(data_directory + '/instructions', "r").readlines()
+
+    existing_instructions_dict = {}
+
+    for i in range(len(instructions)):
+        instruction = instructions[i].strip()
+        if instruction[:4] == 'done':
+            continue
+        c, address = instruction.split(' ')
+        existing_instructions_dict[address] = c
+
+    return existing_instructions_dict
+
+
+def count_emails_for_existing_instructions():
+    count = 0
+    for domain in existing_instructions:
+        matching_addresses = [y for y in set(addresses) if extract_domain(y) == domain]
+        for address in matching_addresses:
+            uids = address_to_uids[address]
+            count += len(uids)
+    return count
+
+
 def write_instructions_file():
     data_directory = os.path.dirname(DATA_PATH)
-    out = open(data_directory + '/instructions', "w")
+    out = open(data_directory + '/instructions', "a")
     for instruction in instructions:
         if instruction:
             out.write(instruction + '\n')
@@ -39,14 +70,30 @@ if __name__ == "__main__":
     else:
         DATA_PATH = sys.argv[1]
 
+    existing_instructions = {}
+
+    if existing_instructions_file_exists():
+        response = None
+        while response not in ['y', 'n']:
+            response = raw_input("Existing instructions file found, would you like to load the rules in there? y or n: ")
+        if response == 'y':
+            existing_instructions = load_existing_instructions_file()
+
     store = json.load(open(DATA_PATH))
 
     addresses = map(extract_address, store.values())
     domains = map(extract_domain, addresses)
 
-    domain_occurences = collections.Counter(domains).most_common()
-
     address_to_uids = address_uids_mapping(store)
+
+    total_email_count = 0
+    if len(existing_instructions) > 0:
+        total_email_count = count_emails_for_existing_instructions()
+        for d in existing_instructions:
+            while d in domains:
+                domains.remove(d)
+
+    domain_occurences = collections.Counter(domains).most_common()
 
     format_str = '{:35}\t{:15}\t{:50}'
 
@@ -55,12 +102,12 @@ if __name__ == "__main__":
     print((format_str+'\n').format('Address', 'Date', 'Subject'))
 
     instructions = []
-    total_email_count = 0
     answer = ''
     i = 0
 
     while (i < len(domain_occurences)):
         domain = domain_occurences[i][0]
+
         matching_addresses = [y for y in set(addresses) if extract_domain(y) == domain]
 
         email_count = 0
