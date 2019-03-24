@@ -25,6 +25,10 @@ def write_instructions_file():
     out.close()
 
 
+def print_help():
+    print('Actions List:\nr = mark as read\nd = delete\ns = skip\nu = undo\nf = finish\nh = help\n')
+
+
 if __name__ == "__main__":
 
     args = len(sys.argv)
@@ -46,9 +50,9 @@ if __name__ == "__main__":
 
     format_str = '{:35}\t{:15}\t{:50}'
 
-    print('Actions List:\nr = mark as read\nd = delete\nu = undo\nf = finish\nany other input = skip')
+    print_help()
 
-    print(('\n'+format_str+'\n').format('Address', 'Date', 'Subject'))
+    print((format_str+'\n').format('Address', 'Date', 'Subject'))
 
     instructions = []
     total_email_count = 0
@@ -74,27 +78,35 @@ if __name__ == "__main__":
         if answer != 'u':
             total_email_count += email_count
 
-        answer = raw_input('\n[{}/{} emails] You have {} unread from @{}. What action would you like to perform on them?\n'.format(total_email_count, len(store), email_count, domain))
+        answer = None
 
-        # u = undo
-        # r = mark as read
-        # d = delete
-        # f = finish
-        # any other input = skip
+        while answer not in ['r', 'd', 's', 'u', 'f', 'h']:
+            answer = raw_input('\n[{}/{} emails] You have {} unread from @{}. What action would you like to perform on them?\n'.format(total_email_count, len(store), email_count, domain))
 
-        if answer == 'f':
-            write_instructions_file()
-            exit()
-        elif answer == 'u':
-            if i > 0:
-                total_email_count -= email_count 
-                instructions.pop()
-                i -= 1
+            # r = mark as read
+            # d = delete
+            # s = skip
+            # u = undo
+            # f = finish
+            # h = help
+
+            if answer == 'f':
+                write_instructions_file()
+                exit()
+            elif answer == 'u':
+                if i > 0:
+                    total_email_count -= email_count
+                    instructions.pop()
+                    i -= 1
+            elif (answer in ['r', 'd']):
+                instructions.append(answer + ' ' + domain)
+            elif answer == 's':
+                instructions.append('')  # so that instructions.pop() above works correctly
+            else:
+                print_help()
+
+        if answer == 'u':
             continue
-        elif (answer in ['r', 'd']):
-            instructions.append(answer + ' ' + domain)
-        else:
-            instructions.append('')  # so that instructions.pop() above works correctly
 
         print('')
 
